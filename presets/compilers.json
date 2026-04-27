@@ -1,0 +1,103 @@
+{
+  "version": 8,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 28
+  },
+  "configurePresets": [
+    {
+      "name": "compiler-gcc-latest",
+      "hidden": true,
+
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_CXX_FLAGS_INIT": "-pedantic -Wall -Wextra -Werror"
+      }
+    },
+    {
+      "name": "compiler-clang-latest",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_CXX_FLAGS_INIT": "-pedantic -Wall -Wextra -Werror"
+      }
+    },
+    {
+      "name": "compiler-x86_64-linux-gnu-clang-latest",
+      "hidden": true,
+      "environment": {
+        "HARDENING_FLAGS": "-pedantic -Wall -Wextra -Werror -Wno-macro-redefined",
+        "CROSS_COMPILER_FLAGS": "-target x86_64-linux-gnu -march=x86-64 -mtune=generic",
+        "CROSS_LINKER_FLAGS": "-target x86_64-linux-gnu -fuse-ld=lld"
+      },
+      "cacheVariables": {
+        "CMAKE_SYSTEM_NAME": "Linux",
+        "CMAKE_SYSTEM_PROCESSOR": "x86_64",
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_C_FLAGS_INIT": "$env{CROSS_COMPILER_FLAGS}",
+        "CMAKE_CXX_FLAGS_INIT": "$env{CROSS_COMPILER_FLAGS} $env{HARDENING_FLAGS}",
+        "CMAKE_EXE_LINKER_FLAGS_INIT": "$env{CROSS_LINKER_FLAGS}",
+        "CMAKE_SHARED_LINKER_FLAGS_INIT": "$env{CROSS_LINKER_FLAGS}"
+      }
+    },
+    {
+      "name": "compiler-arm-linux-gnueabihf-clang-latest",
+      "hidden": true,
+      "environment": {
+        "HARDENING_FLAGS": "-pedantic -Wall -Wextra -Werror -Wno-macro-redefined",
+        "CROSS_COMPILER_FLAGS": "-target arm-linux-gnueabihf -march=armv7-a -mfpu=neon -mfloat-abi=hard",
+        "CROSS_LINKER_FLAGS": "-target arm-linux-gnueabihf -fuse-ld=lld"
+      },
+      "cacheVariables": {
+        "CMAKE_SYSTEM_NAME": "Linux",
+        "CMAKE_SYSTEM_PROCESSOR": "arm",
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_C_FLAGS_INIT": "$env{CROSS_COMPILER_FLAGS}",
+        "CMAKE_CXX_FLAGS_INIT": "$env{CROSS_COMPILER_FLAGS} $env{HARDENING_FLAGS}",
+        "CMAKE_EXE_LINKER_FLAGS_INIT": "$env{CROSS_LINKER_FLAGS}",
+        "CMAKE_SHARED_LINKER_FLAGS_INIT": "$env{CROSS_LINKER_FLAGS}",
+        "CMAKE_CROSSCOMPILING_EMULATOR": "qemu-arm;-L;/usr/arm-linux-gnueabihf"
+      }
+    },
+    {
+      "name": "compiler-aarch64-linux-gnu-clang-latest",
+      "hidden": true,
+      "environment": {
+        "HARDENING_FLAGS": "-pedantic -Wall -Wextra -Werror -Wno-macro-redefined",
+        "CROSS_COMPILER_FLAGS": "-target aarch64-linux-gnu -march=armv8-a -mtune=cortex-a53",
+        "CROSS_LINKER_FLAGS": "-target aarch64-linux-gnu -fuse-ld=lld"
+      },
+      "cacheVariables": {
+        "CMAKE_SYSTEM_NAME": "Linux",
+        "CMAKE_SYSTEM_PROCESSOR": "aarch64",
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_C_FLAGS_INIT": "$env{CROSS_COMPILER_FLAGS}",
+        "CMAKE_CXX_FLAGS_INIT": "$env{CROSS_COMPILER_FLAGS} $env{HARDENING_FLAGS}",
+        "CMAKE_EXE_LINKER_FLAGS_INIT": "$env{CROSS_LINKER_FLAGS}",
+        "CMAKE_SHARED_LINKER_FLAGS_INIT": "$env{CROSS_LINKER_FLAGS}",
+        "CMAKE_CROSSCOMPILING_EMULATOR": "qemu-aarch64;-L;/usr/aarch64-linux-gnu"
+      }
+    },
+    {
+      "name": "compiler-msvc-latest",
+      "hidden": false,
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "cl",
+        "CMAKE_CXX_COMPILER": "cl",
+        "CMAKE_SYSTEM_NAME": "Windows",
+        "CMAKE_SYSTEM_PROCESSOR": "AMD64",
+        "CMAKE_CXX_FLAGS_INIT": "/EHsc /utf-8"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    }
+  ]
+}
