@@ -1,0 +1,54 @@
+[
+  {
+    "label": "CMake Preset: configure",
+    "command": "cmake",
+    "args": [
+      "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+      "--preset=\"$(cmake --list-presets=configure | fzf --header-lines=2 | xargs -n1 | head -n1)\""
+    ],
+    "show_command": false,
+    "tags": ["cmake"]
+  },
+  {
+    "label": "CMake Preset: reconfigure",
+    "command": "cmake",
+    "args": [
+      "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+      "--fresh",
+      "--preset=\"$(cmake --list-presets=configure | fzf --header-lines=2 | xargs -n1 | head -n1)\""
+    ],
+    "show_command": false,
+    "tags": ["cmake"]
+  },
+  {
+    "label": "CMake Preset: build",
+    "command": "cmake",
+    "args": [
+      "--build",
+      "--preset=\"$(cmake --list-presets=build | fzf --header-lines=2 | xargs -n1 | head -n1)\""
+    ],
+    "show_command": false,
+    "tags": ["cmake"]
+  },
+  {
+    "label": "CMake Preset: test",
+    "command": "ctest",
+    "args": [
+      "--preset=\"$(cmake --list-presets=test | fzf --header-lines=2 | xargs -n1 | head -n1)\"",
+      "--output-on-failure"
+    ],
+    "show_command": false,
+    "tags": ["cmake"]
+  },
+  {
+    "label": "CMake Preset: workflow",
+    "command": "cmake",
+    "args": [
+      "--workflow",
+      "--fresh",
+      "--preset=\"$(cmake --list-presets=workflow | fzf --header-lines=2 | xargs -n1 | head -n1)\""
+    ],
+    "show_command": false,
+    "tags": ["cmake"]
+  }
+]
