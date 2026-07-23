@@ -194,9 +194,9 @@ function(parse_project_version input)
     # substring may end with '-'
     string(REGEX REPLACE "-+$" "" REVISION_SLUG "${REVISION_SLUG}")
     # join with semver
-    string(JOIN - REVISION_SLUG "${REVISION_SLUG}" "v${SEMVER_FULL}")
+    string(JOIN - REVISION_SLUG "${REVISION_SLUG}" "${SEMVER_FULL}")
   else()
-    set(REVISION_SLUG "v${SEMVER_FULL}")
+    set(REVISION_SLUG "${SEMVER_FULL}")
   endif()
 
   # Propagate only requested variables
