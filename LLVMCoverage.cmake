@@ -385,6 +385,11 @@ function(add_llvm_coverage_report list_name)
       -output-dir=${COVERAGE_DIR}/html
       ${COVERAGE_IGNORE_ARGS}
 
+    COMMAND
+      ${CMAKE_COMMAND} -E echo
+      "LLVM coverage report has been created in"
+      "‘${COVERAGE_DIR}/html’"
+
     DEPENDS
       ${${list_variable}}
 
