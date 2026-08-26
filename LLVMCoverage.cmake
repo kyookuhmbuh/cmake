@@ -56,8 +56,15 @@ llvm-cov executables.
 ]]
 
 # Cache current list dir
-set(LLVM_COVERAGE_MODULE_DIR
+set(_LLVM_COVERAGE_MODULE_DIR
   "${CMAKE_CURRENT_LIST_DIR}"
+)
+
+# Visability and propagation scopes
+set(_LLVM_COVERAGE_SCOPES
+  PRIVATE
+  PUBLIC
+  INTERFACE
 )
 
 #[[
@@ -113,28 +120,66 @@ macro (enable_llvm_coverage)
   endif()
 
   set(LLVM_COVERAGE_SUPPORTED ON)
-
-  # Compiler instrumentation required for LLVM source-based coverage.
-  add_library(llvm_coverage_compile_flags INTERFACE)
-  target_compile_options(llvm_coverage_compile_flags
-    INTERFACE
-      -fprofile-instr-generate
-      -fcoverage-mapping
-  )
-
-  # Linker instrumentation required to emit LLVM profiling runtime support.
-  add_library(llvm_coverage_link_flags INTERFACE)
-  target_link_options(llvm_coverage_link_flags
-    INTERFACE
-      -fprofile-instr-generate
-  )
-
   set(LLVM_COVERAGE_INTERFACE_INITIALIZED ON)
 
   message(STATUS
     "LLVM coverage interface initialized"
   )
 endmacro()
+
+#[[
+Add LLVM source-based coverage compile options to a target.
+
+The options enable LLVM instrumentation during compilation:
+- -fprofile-instr-generate enables profile data generation;
+- -fcoverage-mapping generates the coverage mapping required by llvm-cov.
+
+@param target_name
+  Name of the target to which the options are added.
+
+@param scope
+  Target usage requirement: PRIVATE, PUBLIC, or INTERFACE.
+]]
+function(add_llvm_coverage_compile_options target_name scope)
+  if(NOT scope IN_LIST _LLVM_COVERAGE_SCOPES)
+    message(FATAL_ERROR
+      "Invalid coverage compile options scope '${scope}'. "
+      "Expected PRIVATE, PUBLIC, or INTERFACE."
+    )
+  endif()
+
+  target_compile_options(${target_name}
+    ${scope}
+      -fprofile-instr-generate
+      -fcoverage-mapping
+  )
+endfunction()
+
+#[[
+Add LLVM source-based coverage link options to a target.
+
+The -fprofile-instr-generate option enables the LLVM profiling runtime
+required by instrumented executables.
+
+@param target_name
+  Name of the target to which the options are added.
+
+@param scope
+  Target usage requirement: PRIVATE, PUBLIC, or INTERFACE.
+]]
+function(add_llvm_coverage_link_options target_name scope)
+  if(NOT scope IN_LIST _LLVM_COVERAGE_SCOPES)
+    message(FATAL_ERROR
+      "Invalid coverage link options scope '${scope}'. "
+      "Expected PRIVATE, PUBLIC, or INTERFACE."
+    )
+  endif()
+
+  target_link_options(${target_name}
+    ${scope}
+      -fprofile-instr-generate
+  )
+endfunction()
 
 #[[
 Instrument a target for LLVM source-based code coverage.
@@ -157,8 +202,8 @@ function(add_llvm_coverage target_name)
     return()
   endif()
 
-  target_link_libraries(${target_name} PRIVATE llvm_coverage_compile_flags)
-  target_link_libraries(${target_name} PRIVATE llvm_coverage_link_flags)
+  add_llvm_coverage_compile_options(${target_name} PRIVATE)
+  add_llvm_coverage_link_options(${target_name} PRIVATE)
 
   message(STATUS
     "LLVM coverage instrumentation added to target '${target_name}'"
@@ -341,7 +386,7 @@ function(add_llvm_coverage_report list_name)
   )
 
   configure_file(
-    "${LLVM_COVERAGE_MODULE_DIR}/LLVMCoverageMerge.cmake.in"
+    "${_LLVM_COVERAGE_MODULE_DIR}/LLVMCoverageMerge.cmake.in"
     "${LLVM_COVERAGE_MERGE_SCRIPT}"
     @ONLY
   )
