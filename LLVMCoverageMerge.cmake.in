@@ -1,0 +1,26 @@
+file(GLOB PROFILE_FILES
+  "@LLVM_COVERAGE_PROFILE_DIR@/*.profraw"
+)
+
+if(NOT PROFILE_FILES)
+  message(FATAL_ERROR
+    "No LLVM coverage profile files found in "
+    "'@LLVM_COVERAGE_PROFILE_DIR@'"
+  )
+endif()
+
+execute_process(
+  COMMAND
+    "@LLVM_PROFDATA_EXECUTABLE@"
+    merge
+    -sparse
+    ${PROFILE_FILES}
+    -o "@LLVM_COVERAGE_PROFDATA_FILE@"
+  RESULT_VARIABLE result
+)
+
+if(NOT result EQUAL 0)
+  message(FATAL_ERROR
+    "llvm-profdata merge failed with exit code ${result}"
+  )
+endif()
