@@ -1,6 +1,4 @@
 
-include_guard(GLOBAL)
-
 # Parses a project version string into components
 #
 # Notes:
