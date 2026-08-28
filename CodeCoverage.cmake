@@ -431,6 +431,10 @@ libraries, whose code is compiled into those executables.
 @param list_name
   Name of the coverage target group.
 
+@param ALL
+  Indicate that this target should be added to the default build target
+  so that it will be run every time.
+
 @param TARGET_NAME
   Optional name of custom target to build a report.
 
@@ -449,7 +453,7 @@ function(add_code_coverage_report list_name)
     return()
   endif()
 
-  set(options)
+  set(options ALL)
   set(one_value_args TARGET_NAME OUTPUT_DIR)
   set(multi_value_args EXCLUDE_DIRS EXCLUDE_FILES)
 
@@ -630,13 +634,20 @@ function(add_code_coverage_report list_name)
     )
   endif()
 
-  set(custom_target_name "${list_name}")
+  set(_custom_target_name "${list_name}")
   if(ARG_TARGET_NAME)
-    set(custom_target_name "${ARG_TARGET_NAME}")
+    set(_custom_target_name "${ARG_TARGET_NAME}")
   endif()
 
-  add_custom_target(${custom_target_name}
+  set(_all_flag)
+  if(ARG_ALL)
+    set(_all_flag ALL)
+  endif()
+
+  add_custom_target(${_custom_target_name}
+    ${_all_flag}
     ${_report_commands}
+    COMMENT "Executing code coverage reports building."
     DEPENDS ${${list_variable}}
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
     USES_TERMINAL
@@ -644,7 +655,7 @@ function(add_code_coverage_report list_name)
   )
 
   message(STATUS
-    "Coverage report '${custom_target_name}' initialized for targets: "
+    "Code coverage report '${_custom_target_name}' initialized for targets: "
     "${${list_variable}} (${CODE_COVERAGE_MODE} mode)"
   )
 endfunction()
