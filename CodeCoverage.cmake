@@ -431,6 +431,9 @@ libraries, whose code is compiled into those executables.
 @param list_name
   Name of the coverage target group.
 
+@param TARGET_NAME
+  Optional name of custom target to build a report.
+
 @param OUTPUT_DIR
   Optional directory where the generated HTML report is placed.
   Defaults to the current binary directory.
@@ -447,7 +450,7 @@ function(add_code_coverage_report list_name)
   endif()
 
   set(options)
-  set(one_value_args OUTPUT_DIR)
+  set(one_value_args TARGET_NAME OUTPUT_DIR)
   set(multi_value_args EXCLUDE_DIRS EXCLUDE_FILES)
 
   cmake_parse_arguments(
@@ -481,6 +484,8 @@ function(add_code_coverage_report list_name)
   if(ARG_OUTPUT_DIR)
     set(COVERAGE_OUTPUT_DIR "${ARG_OUTPUT_DIR}")
   endif()
+  set(COVERAGE_OUTPUT_HTML_DIR "${COVERAGE_OUTPUT_DIR}/html")
+  set(COVERAGE_OUTPUT_TXT_DIR "${COVERAGE_OUTPUT_DIR}/txt")
 
   set(_report_commands)
 
@@ -546,8 +551,11 @@ function(add_code_coverage_report list_name)
 
     list(APPEND _report_commands
       COMMAND ${CMAKE_COMMAND} -E rm -rf "${COVERAGE_INTERMEDIATE_DIR}"
-      COMMAND ${CMAKE_COMMAND} -E rm -rf "${COVERAGE_OUTPUT_DIR}/html"
+      COMMAND ${CMAKE_COMMAND} -E rm -rf "${COVERAGE_OUTPUT_HTML_DIR}"
+      COMMAND ${CMAKE_COMMAND} -E rm -rf "${COVERAGE_OUTPUT_TXT_DIR}"
       COMMAND ${CMAKE_COMMAND} -E make_directory "${COVERAGE_INTERMEDIATE_DIR}"
+      COMMAND ${CMAKE_COMMAND} -E make_directory "${COVERAGE_OUTPUT_HTML_DIR}"
+      COMMAND ${CMAKE_COMMAND} -E make_directory "${COVERAGE_OUTPUT_TXT_DIR}"
       COMMAND ${CMAKE_COMMAND} -E make_directory "${PROFILE_DIR}"
 
       COMMAND ${CMAKE_COMMAND} -E env
@@ -568,11 +576,12 @@ function(add_code_coverage_report list_name)
         ${COVERAGE_OBJECTS}
         -instr-profile=${PROFDATA_FILE}
         -format=html
-        -output-dir=${COVERAGE_OUTPUT_DIR}/html
+        -output-dir=${COVERAGE_OUTPUT_HTML_DIR}
         ${COVERAGE_IGNORE_ARGS}
 
       COMMAND ${CMAKE_COMMAND} -E echo
-        "LLVM coverage report has been created in '${COVERAGE_OUTPUT_DIR}/html'"
+        "LLVM code coverage report has been created in"
+        "'${COVERAGE_OUTPUT_HTML_DIR}/index.html'"
     )
 
   elseif(CODE_COVERAGE_MODE STREQUAL "GNU")
@@ -593,8 +602,10 @@ function(add_code_coverage_report list_name)
     endif()
 
     list(APPEND _report_commands
-      COMMAND ${CMAKE_COMMAND} -E rm -rf "${COVERAGE_OUTPUT_DIR}/html"
-      COMMAND ${CMAKE_COMMAND} -E make_directory "${COVERAGE_OUTPUT_DIR}/html"
+      COMMAND ${CMAKE_COMMAND} -E rm -rf "${COVERAGE_OUTPUT_HTML_DIR}"
+      COMMAND ${CMAKE_COMMAND} -E rm -rf "${COVERAGE_OUTPUT_TXT_DIR}"
+      COMMAND ${CMAKE_COMMAND} -E make_directory "${COVERAGE_OUTPUT_HTML_DIR}"
+      COMMAND ${CMAKE_COMMAND} -E make_directory "${COVERAGE_OUTPUT_TXT_DIR}"
 
       COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
 
@@ -603,17 +614,28 @@ function(add_code_coverage_report list_name)
       COMMAND ${CODE_COVERAGE_GNU_GCOVR_PATH}
         --root "${CMAKE_CURRENT_SOURCE_DIR}"
         --gcov-executable "${GCOVR_GCOV_EXECUTABLE}"
-        --html
+        --txt "${COVERAGE_OUTPUT_TXT_DIR}/index.txt"
+        --html "${COVERAGE_OUTPUT_HTML_DIR}/index.html"
         --html-details
-        -o "${COVERAGE_OUTPUT_DIR}/html/index.html"
+        --html-details-syntax-highlighting
+        --html-theme github.green
+        --html-title "'${PROJECT_NAME}' code coverage report"
+        --html-self-contained
+        --print-summary
         ${GCOVR_EXCLUDE_ARGS}
 
       COMMAND ${CMAKE_COMMAND} -E echo
-        "GNU coverage report has been created in '${COVERAGE_OUTPUT_DIR}/html'"
+        "GNU code coverage report has been created in"
+        "'${COVERAGE_OUTPUT_HTML_DIR}/index.html'"
     )
   endif()
 
-  add_custom_target(${list_name}
+  set(custom_target_name "${list_name}")
+  if(ARG_TARGET_NAME)
+    set(custom_target_name "${ARG_TARGET_NAME}")
+  endif()
+
+  add_custom_target(${custom_target_name}
     ${_report_commands}
     DEPENDS ${${list_variable}}
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
@@ -622,7 +644,7 @@ function(add_code_coverage_report list_name)
   )
 
   message(STATUS
-    "Coverage report '${list_name}' initialized for targets: "
+    "Coverage report '${custom_target_name}' initialized for targets: "
     "${${list_variable}} (${CODE_COVERAGE_MODE} mode)"
   )
 endfunction()
