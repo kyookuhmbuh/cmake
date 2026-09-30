@@ -1,5 +1,5 @@
 {
-  "$schema": "schema.json",
+  "$schema": "presets/schema.json",
   "version": 8,
   "cmakeMinimumRequired": {
     "major": 3,
